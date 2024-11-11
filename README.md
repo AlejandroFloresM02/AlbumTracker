@@ -1,0 +1,1 @@
+A personal web app for keeping track of vinyl albums I'm looking forward to buying, along with their cover art, title, artist, release date, and priority level.
