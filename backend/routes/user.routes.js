@@ -13,3 +13,5 @@ const{
 router.post('/register', userController.registerUser);
 router.post('/login', userController.loginUser);
 router.delete('/delete', userController.deleteUser); 
+
+module.exports = router;
