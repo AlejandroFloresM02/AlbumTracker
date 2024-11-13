@@ -53,9 +53,8 @@ const saveAlbum = async(req,res) => {
             priority: savedAlbum.priority
         });
     }catch(error){
-        res.status(500).json({
-            error: error.message
-        });
+        console.error("Error saving album", error.message)
+        res.status(500).json({error: "an error ocurred saving the album."});
     }
 };
 
@@ -64,7 +63,7 @@ const getAlbums = async (req,res) => {
         const album = await Album.find();
         res.json(album);
     }catch(error){
-        res.status(500).json({error: error.message});
+        res.status(500).json({error: "Error album not found"});
     }
 };
 

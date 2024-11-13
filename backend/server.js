@@ -2,8 +2,10 @@ const { default: axios } = require("axios");
 const express = require("express");
 const mongoose = require("mongoose");
 const Album = require("./models/album.model.js");
-const albumRoutes = require("./routes/album.route.js");
+const albumRoutes = require("./routes/album.routes.js");
 const app = express();
+
+
 
 require("dotenv").config();
 
@@ -14,6 +16,10 @@ app.use(express.urlencoded({ extended: false }));
 
 //routes
 app.use("/api/albums", albumRoutes);
+
+app.get('/users', (req,res)=> {
+  res.json(users);
+})
 
 app.get("/", (req, res) => {
   res.send("This is AlbumTracker server");
