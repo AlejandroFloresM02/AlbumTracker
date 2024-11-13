@@ -43,17 +43,15 @@ function validateEmail(email) {
   return null;
 }
 
-async function  findUser(user, email){
-    const existingUser = await user.findOne({
-        $or: [{username},{email}]
-    });
+async function findUser(username, email) {
+  const existingUser = await User.findOne({
+    $or: [{ username }, { email }],
+  });
 
-    if(!existingUser){
-        return "User not found. Please enter valid username or email."
-    }
-
-
-
+  if (!existingUser) {
+    return "User not found. Please enter valid username or email.";
+  }
+  return null;
 }
 
 const registerUser = async (req, res) => {
@@ -68,10 +66,8 @@ const registerUser = async (req, res) => {
     if (passwordError) {
       return res.status(400).json({ error: passwordError });
     }
-
-    //use find user function TODO
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const userExistError = findUser(username, email);
+    if (!userExistError) {
       return res.status(400).json({ error: "Email alredy in use." });
     }
 
@@ -87,42 +83,54 @@ const registerUser = async (req, res) => {
     res.status(200).json({ message: "User registered successfully" });
   } catch {
     console.error("Registration error", error.message);
-    res.status(500).json({ error:"An error occured registering the user." });
+    res.status(500).json({ error: "An error occured registering the user." });
   }
 };
 
 const loginUser = async (req, res) => {
   try {
-    const { username, email, password} = req.body;
-    const existingUser = await User.findOne({
-        $or:[{username},{email}]
-    });
+    const { username, email, password } = req.body;
 
-    if (!existingUser){
-        return res.status(400).json({ error: "User not found. Please enter valid username or email."})
+    const userExistError = findUser(username, email);
+    if (userExistError) {
+      return res.status(404).json({ error: userExistError });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
 
-    if(!isPasswordCorrect){
-        return res.status(400).json({error: "Invalid password. Please try again."});
+    if (!isPasswordCorrect) {
+      return res
+        .status(400)
+        .json({ error: "Invalid password. Please try again." });
     }
-  } catch(error){
-    console.error("Login error:",error.message);
-    res.status(400).json({error:"An error occured during login."});
+  } catch (error) {
+    console.error("Login error:", error.message);
+    res.status(400).json({ error: "An error occured during login." });
   }
 };
 
-const deleteUser = async(req, res) => {
-    try{
-        
-    }catch(error){
-        console.error('Delete error', error.message);
-        res.status(400).json({error: "An error occured deleting the user"});
+const deleteUser = async (req, res) => {
+  try {
+    const { username, email } = req.body;
+    const userExistError = findUser(username, email);
+
+    if (userExistError) {
+      return res.status(404).json({ error: userExistError });
     }
-}
+
+    await User.deleteOne({ $or: [{ username }, { email }] });
+    res.status(200).json({ message: "User succesfully deleted" });
+  } catch (error) {
+    console.error("Delete error", error.message);
+    res.status(400).json({ error: "An error occured deleting the user" });
+  }
+};
 
 module.exports = {
   registerUser,
   loginUser,
+  deleteUser,
 };
