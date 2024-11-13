@@ -3,7 +3,7 @@ const { searchAlbums } = require('./spotifyService');
 
 (async () => {
     try {
-        const albums = await searchAlbums('Dark Side of the Moon'); 
+        const albums = await searchAlbums('Deathconsciousness'); 
         console.log(albums); 
     } catch (error) {
         console.error('Test failed:', error.message);

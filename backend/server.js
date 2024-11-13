@@ -1,32 +1,22 @@
 const { default: axios } = require("axios");
 const express = require("express");
 const mongoose = require("mongoose");
-const qs = require("qs");
-require("dotenv").config();
-
+const Album = require("./models/album.model.js");
 const app = express();
 
-
-
+require("dotenv").config();
 
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(express.static("frontend"));
 
-//routes TODO
-
-
-
-
+//routes
+app.use("/api/albums", albumRoutes);
 
 app.get("/", (req, res) => {
   res.send("This is AlbumTracker server");
 });
-
-
-
-
 
 mongoose
   .connect(process.env.MONGODB_URI)
