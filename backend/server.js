@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const express = require("express");
 const mongoose = require("mongoose");
 const Album = require("./models/album.model.js");
+const albumRoutes = require("./routes/album.route.js");
 const app = express();
 
 require("dotenv").config();
