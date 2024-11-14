@@ -1,7 +1,14 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/user.model.js");
-const { emit } = require("nodemon");
-const { use } = require("../routes/album.routes.js");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user.model");
+const { use } = require("../routes/album.routes");
+require("dotenv").config();
+
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRATION,
+  });
+};
 
 function validatePassword(password) {
   const COMMON_PASSWORDS = new Set([
@@ -43,17 +50,6 @@ function validateEmail(email) {
   return null;
 }
 
-async function findUser(username, email) {
-  const existingUser = await User.findOne({
-    $or: [{ username }, { email }],
-  });
-
-  if (!existingUser) {
-    return "User not found. Please enter valid username or email.";
-  }
-  return null;
-}
-
 const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -66,13 +62,20 @@ const registerUser = async (req, res) => {
     if (passwordError) {
       return res.status(400).json({ error: passwordError });
     }
-    const userExistError = findUser(username, email);
-    if (!userExistError) {
-      return res.status(400).json({ error: "Email alredy in use." });
+
+    const existingUser = await User.findOne({
+      $or: [{ username }, { email }],
+    });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ error: "Email or username already in use." });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
     const user = new User({
       username,
       email,
@@ -80,7 +83,18 @@ const registerUser = async (req, res) => {
     });
 
     await user.save();
-    res.status(200).json({ message: "User registered successfully" });
+
+    const token = generateToken(use._id);
+
+    res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch {
     console.error("Registration error", error.message);
     res.status(500).json({ error: "An error occured registering the user." });
@@ -91,21 +105,28 @@ const loginUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    const userExistError = findUser(username, email);
-    if (userExistError) {
-      return res.status(404).json({ error: userExistError });
-    }
-
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
+    const user = await User.findOne({
+      $or: [{username},{email}]
+    });
+    
+    const isPasswordCorrect = await bcrypt.compare(password,existingUser.password);
 
     if (!isPasswordCorrect) {
-      return res
-        .status(400)
-        .json({ error: "Invalid password. Please try again." });
+      return res.status(400).json({ error: "Invalid password. Please try again." });
     }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        username:user.username,
+        email: user.email
+      }
+    });
+
   } catch (error) {
     console.error("Login error:", error.message);
     res.status(400).json({ error: "An error occured during login." });
@@ -130,7 +151,7 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-  registerUser,
-  loginUser,
-  deleteUser,
+    registerUser,
+    loginUser,
+    deleteUser
 };

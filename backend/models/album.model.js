@@ -28,6 +28,15 @@ const AlbumSchema = mongoose.Schema({
     type: String,
     enum: ['high','medium','low'],
     default: 'low'
+  },
+  userId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  spotifyId:{
+    type: String,
+    required: true
   }
 },{
     timestamps: true

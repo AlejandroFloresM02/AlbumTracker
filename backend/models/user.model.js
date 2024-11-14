@@ -16,12 +16,10 @@ const UserSchema = mongoose.Schema(
       type: String,
       require: [true, "Enter your password"],
     },
-    cratedAt: {
-      type: Date,
-    },
-    updatedAt: {
-      type: Date,
-    },
+    savedAlbums: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Album'
+    }]
   },
   {
     timestamps: true,
