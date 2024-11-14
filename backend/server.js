@@ -2,8 +2,8 @@ const { default: axios } = require("axios");
 const express = require("express");
 const mongoose = require("mongoose");
 const Album = require("./models/album.model.js");
-const albumRoutes = require("./routes/album.routes.js");
 const User = require("./models/user.model.js");
+const albumRoutes = require("./routes/album.routes.js");
 const userRoutes = require("./routes/user.routes.js");
 const app = express();
 

@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const albumController = require("../controllers/album.controller");
+const authMiddleware = require("../middleware/auth");
 
-const{
-    searchAlbums,
-    saveAlbum,
-    getAlbums,
-} = require("../controllers/album.controller.js");
+router.use(authMiddleware);
 
-router.get("/search", albumController.searchAlbums);
-router.post("/save", albumController.saveAlbum);
-router.get("/", albumController.getUserAlbums);
+const { searchAlbums, saveAlbum, getUserAlbums } = require("../controllers/album.controller");
+
+router.get("/search", searchAlbums);
+router.post("/", saveAlbum); 
+router.get("/", getUserAlbums); 
+
 
 module.exports = router;

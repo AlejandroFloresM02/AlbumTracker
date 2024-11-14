@@ -16,10 +16,12 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: "User not found" });
     }
 
-    req.user = reql;
+    req.user = user;
     next();
   } catch (error) {
     console.error("Auth error:", error.message);
     res.status(401).json({ error: "Please authenticate" });
   }
 };
+
+module.exports = authMiddleware;

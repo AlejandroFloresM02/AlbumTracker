@@ -136,10 +136,13 @@ const loginUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { username, email } = req.body;
-    const userExistError = findUser(username, email);
+    
+    const currUser = await User.findOne({
+      $or: [{username},{email}]
+    });
 
-    if (userExistError) {
-      return res.status(404).json({ error: userExistError });
+    if (!currUser) {
+      return res.status(404).json({ error:"The user doesn't exists"});
     }
 
     await User.deleteOne({ $or: [{ username }, { email }] });
